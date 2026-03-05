@@ -1,0 +1,3 @@
+[submodule "feline-age-prediction"]
+	path = feline-age-prediction
+	url = https://github.com/aster-droide/feline-age-prediction.git
