@@ -11,4 +11,6 @@ YAMNET_FILENAME = "yamnet_looped_embeddings.csv"
 RANDOM_SEED = 42
 
 AGE_GROUP_CATEGORIES = ['Kitten', 'Adult', 'Senior']
-NUM_CLASSES = len(AGE_GROUP_CATEGORIES)
+NUM_AGE_GROUPS = len(AGE_GROUP_CATEGORIES)
+
+SEX_CATEGORIES = ['M', 'F', 'X']
