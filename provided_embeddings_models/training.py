@@ -9,7 +9,19 @@ from sklearn.model_selection import train_test_split
 def split_embeddings(all_embeddings: pd.DataFrame, label_col: str,
                      val_size: float = 0.1, test_size: float = 0.1) -> Tuple[
     pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame]:
+    """
+    Split embeddings into train, validation, and test sets.
+    Combined size of the validation and test sets must be less than the entire dataset.
+
+    :param all_embeddings: pandas dataframe with all embeddings
+    :param label_col: name of target column
+    :param val_size: size of validation set. Must be float in (0, 1). Defaults to 0.1.
+    :param test_size: size of test set. Must be float in (0, 1). Defaults to 0.1.
+    :return: train_features, val_features, test_features, train_targets, val_targets, test_targets
+    """
     assert label_col in all_embeddings.columns
+    assert 0 < val_size < 1
+    assert 0 < test_size < 1
     assert 0 < val_size + test_size < 1
 
     features = all_embeddings.drop(columns=label_col)

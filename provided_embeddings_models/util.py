@@ -7,6 +7,15 @@ from provided_embeddings_models.constants import EMBEDDINGS_DIR, AGE_GROUP_CATEG
 
 
 def load_embeddings_data(filename: str) -> pd.DataFrame:
+    """
+    Load dataset from pretrained embeddings from Van Toor paper, and update it as follows:
+        - 'target' column is updated to 'age' to allow multiple possible target labels.
+        - 'gender' column is updated to 'sex' to fit standard terminology.
+        - 'age_group' column is added for classification task.
+
+    :param filename: name of file in `EMBEDDINGS_DIR` containing dataset
+    :return: pandas DataFrame containing embeddings
+    """
     df = pd.read_csv(EMBEDDINGS_DIR / filename)
     df.rename(columns={'target': 'age', 'gender': 'sex'}, inplace=True)
     df['age_group'] = df['age'].apply(_age_to_age_group)
@@ -23,6 +32,12 @@ def _age_to_age_group(age: float) -> str:
 
 
 def clean_embeddings_for_age_group(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Remove metadata and label columns other than 'age_group', remove rows with missing values, and map string age groups to integer indices.
+
+    :param df: pandas DataFrame containing embeddings
+    :return: new DataFrame with cleaned embeddings
+    """
     label_col = 'age_group'
     new_df = _clean_embeddings(df, label_col)
 
@@ -36,12 +51,24 @@ def _age_group_str_to_index(age_group: str) -> int:
 
 
 def clean_embeddings_for_age(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Remove metadata and label columns other than 'age' and remove rows with missing values.
+
+    :param df: pandas DataFrame containing embeddings
+    :return: new DataFrame with cleaned embeddings
+    """
     label_col = 'age'
     new_df = _clean_embeddings(df, label_col)
     return new_df
 
 
 def clean_embeddings_for_sex(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Remove metadata and label columns other than 'sex', remove rows with unknown sex or missing values, and map string sexes to integer indices.
+
+    :param df: pandas DataFrame containing embeddings
+    :return: new DataFrame with cleaned embeddings
+    """
     label_col = 'sex'
     new_df = _clean_embeddings(df, label_col)
 
