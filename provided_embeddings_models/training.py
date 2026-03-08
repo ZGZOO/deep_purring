@@ -1,6 +1,7 @@
 from typing import Tuple
 
 import pandas as pd
+from sklearn.decomposition import PCA
 from sklearn.preprocessing import StandardScaler
 
 from provided_embeddings_models.constants import RANDOM_STATE
@@ -58,3 +59,18 @@ def standardize_embeddings(train_features: pd.DataFrame, val_features: pd.DataFr
     scaler = StandardScaler()
     scaler.fit(train_features)
     return scaler.transform(train_features), scaler.transform(val_features), scaler.transform(test_features)
+
+
+def pca_embeddings(train_features: pd.DataFrame, val_features: pd.DataFrame, test_features: pd.DataFrame,
+                   n_components: int) -> Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
+    """
+    Reduce dimensionality of embeddings using PCA. PCA model is fit to the train_features only and then transforms all features.
+
+    :param train_features: pandas dataframe with train set embeddings
+    :param val_features: pandas dataframe with validation set embeddings
+    :param test_features: pandas dataframe with test set embeddings
+    :param n_components: number of PCA components
+    """
+    pca = PCA(n_components=n_components)
+    pca.fit(train_features)
+    return pca.transform(train_features), pca.transform(val_features), pca.transform(test_features)

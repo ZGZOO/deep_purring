@@ -1,5 +1,5 @@
 from constants import *
-from provided_embeddings_models.training import split_embeddings, standardize_embeddings
+from provided_embeddings_models.training import split_embeddings, standardize_embeddings, pca_embeddings
 from util import *
 
 # load dataset into pandas from csv
@@ -34,3 +34,10 @@ print(f'Test labels: {test_labels.shape}')
 print(f'Train features range: {train_features_std.min()} - {train_features_std.max()}')
 print(f'Val features range: {val_features_std.min()} - {val_features_std.max()}')
 print(f'Test features range: {test_features_std.min()} - {test_features_std.max()}')
+
+# PCA features
+(train_features_pca, val_features_pca, test_features_pca) = pca_embeddings(train_features_std, val_features_std,
+                                                                           test_features_std, 32)
+print(f'Train features pca: {train_features_pca.shape}')
+print(f'Val features pca: {val_features_pca.shape}')
+print(f'Test features pca: {test_features_pca.shape}')
