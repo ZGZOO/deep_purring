@@ -3,23 +3,30 @@ from typing import Any
 import pandas as pd
 from pandas import DataFrame, Series
 
-from provided_embeddings_models.constants import EMBEDDINGS_DIR, AGE_GROUP_CATEGORIES, SEX_CATEGORIES
+from provided_embeddings_models.constants import EMBEDDINGS_DIR, AGE_GROUP_CATEGORIES, GENDER_CATEGORIES
 
 
 def load_embeddings_data(filename: str) -> pd.DataFrame:
     """
     Load dataset from pretrained embeddings from Van Toor paper, and update it as follows:
         - 'target' column is updated to 'age' to allow multiple possible target labels.
-        - 'gender' column is updated to 'sex' to fit standard terminology.
         - 'age_group' column is added for classification task.
 
     :param filename: name of file in `EMBEDDINGS_DIR` containing dataset
     :return: pandas DataFrame containing embeddings
     """
     df = pd.read_csv(EMBEDDINGS_DIR / filename)
-    df.rename(columns={'target': 'age', 'gender': 'sex'}, inplace=True)
+    df.rename(columns={'target': 'age'}, inplace=True)
     df['age_group'] = df['age'].apply(_age_to_age_group)
     return df
+
+
+# TODO: Implement load_audio_data() in a new audio_loading.py module. It should:
+#  - load raw .wav files from AUDIO_DIR,
+#  - resample to 96kHz (max sample rate in the dataset),
+#  - generate spectrograms via spectrogram.py,
+#  - extract embeddings via cnn_embeddings.py,
+#  - return a DataFrame in the same format as load_embeddings_data().
 
 
 def _age_to_age_group(age: float) -> str:
@@ -62,26 +69,26 @@ def clean_embeddings_for_age(df: pd.DataFrame) -> pd.DataFrame:
     return new_df
 
 
-def clean_embeddings_for_sex(df: pd.DataFrame) -> pd.DataFrame:
+def clean_embeddings_for_gender(df: pd.DataFrame) -> pd.DataFrame:
     """
-    Remove metadata and label columns other than 'sex', remove rows with unknown sex or missing values, and map string sexes to integer indices.
+    Remove metadata and label columns other than 'gender', remove rows with unknown gender or missing values, and map string genders to integer indices.
 
     :param df: pandas DataFrame containing embeddings
     :return: new DataFrame with cleaned embeddings
     """
-    label_col = 'sex'
+    label_col = 'gender'
     new_df = _clean_embeddings(df, label_col)
 
-    # remove unknown sex
-    new_df = new_df[new_df['sex'] != SEX_CATEGORIES[-1]]
+    # remove unknown gender
+    new_df = new_df[new_df['gender'] != GENDER_CATEGORIES[-1]]
 
-    # encode sex as ints
-    new_df['sex'] = new_df['sex'].apply(_sex_str_to_index)
+    # encode gender as ints
+    new_df['gender'] = new_df['gender'].apply(_gender_str_to_index)
     return new_df
 
 
-def _sex_str_to_index(sex: str) -> int:
-    return SEX_CATEGORIES.index(sex)
+def _gender_str_to_index(gender: str) -> int:
+    return GENDER_CATEGORIES.index(gender)
 
 
 def _clean_embeddings(df: DataFrame, label_col: str) -> Series | DataFrame | Any:

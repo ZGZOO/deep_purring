@@ -3,3 +3,7 @@ pandas
 scikit-learn
 scipy
 torch
+pytorch-lightning
+optuna
+torchmetrics
+joblib
