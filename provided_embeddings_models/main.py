@@ -1,17 +1,17 @@
 from constants import *
-from provided_embeddings_models.training import split_embeddings, standardize_embeddings, pca_embeddings
+from provided_embeddings_models.preprocessing import split_embeddings, standardize_embeddings, pca_embeddings
 from util import *
 
 # load dataset into pandas from csv
-data = load_embeddings_data(VGGISH_FILENAME)
+data = load_embeddings_data(YAMNET_FILENAME)
 # print(data.head())
 
 # age group isolated
-age_group_cleaned = clean_embeddings_for_age_group(data)
+# age_group_cleaned = clean_embeddings_for_age_group(data)
 # print(age_group_cleaned.head())
 
 # age (continuous) isolated
-# age_cleaned = clean_embeddings_for_age(data)
+age_cleaned = clean_embeddings_for_age(data)
 # print(age_cleaned.head())
 
 # sex (M/F) isolated
@@ -20,7 +20,7 @@ age_group_cleaned = clean_embeddings_for_age_group(data)
 
 # train/val/test split
 (train_features, val_features, test_features,
- train_labels, val_labels, test_labels) = split_embeddings(age_group_cleaned, 'age_group', val_size=0.12)
+ train_labels, val_labels, test_labels) = split_embeddings(age_cleaned, 'age', val_size=0.12, regression=True)
 print(f'Train features: {train_features.shape}')
 print(f'Train labels: {train_labels.shape}')
 print(f'Val features: {val_features.shape}')
