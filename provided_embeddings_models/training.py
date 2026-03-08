@@ -1,6 +1,7 @@
 from typing import Tuple
 
 import pandas as pd
+from sklearn.preprocessing import StandardScaler
 
 from provided_embeddings_models.constants import RANDOM_STATE
 from sklearn.model_selection import train_test_split
@@ -43,3 +44,17 @@ def split_embeddings(all_embeddings: pd.DataFrame, label_col: str,
     )
 
     return train_features, val_features, test_features, train_targets, val_targets, test_targets
+
+
+def standardize_embeddings(train_features: pd.DataFrame, val_features: pd.DataFrame,
+                           test_features: pd.DataFrame) -> Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
+    """
+    Standardize embeddings using StandardScaler. The scaler is fit to the train_features only and then transforms all features.
+    :param train_features: pandas dataframe with train set embeddings
+    :param val_features: pandas dataframe with validation set embeddings
+    :param test_features: pandas dataframe with test set embeddings
+    :return: standardized train_features, val_features, test_features
+    """
+    scaler = StandardScaler()
+    scaler.fit(train_features)
+    return scaler.transform(train_features), scaler.transform(val_features), scaler.transform(test_features)

@@ -1,5 +1,5 @@
 from constants import *
-from provided_embeddings_models.training import split_embeddings
+from provided_embeddings_models.training import split_embeddings, standardize_embeddings
 from util import *
 
 # load dataset into pandas from csv
@@ -18,6 +18,7 @@ age_group_cleaned = clean_embeddings_for_age_group(data)
 # sex_cleaned = clean_embeddings_for_sex(data)
 # print(sex_cleaned.head())
 
+# train/val/test split
 (train_features, val_features, test_features,
  train_labels, val_labels, test_labels) = split_embeddings(age_group_cleaned, 'age_group', val_size=0.12)
 print(f'Train features: {train_features.shape}')
@@ -26,3 +27,10 @@ print(f'Val features: {val_features.shape}')
 print(f'Val labels: {val_labels.shape}')
 print(f'Test features: {test_features.shape}')
 print(f'Test labels: {test_labels.shape}')
+
+# standardized features
+(train_features_std, val_features_std,
+ test_features_std) = standardize_embeddings(train_features, val_features, test_features)
+print(f'Train features range: {train_features_std.min()} - {train_features_std.max()}')
+print(f'Val features range: {val_features_std.min()} - {val_features_std.max()}')
+print(f'Test features range: {test_features_std.min()} - {test_features_std.max()}')
