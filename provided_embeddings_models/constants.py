@@ -8,7 +8,7 @@ PERCH_FILENAME = "perch_looped_embeddings.csv"
 VGGISH_FILENAME = "vggish_looped_embeddings.csv"
 YAMNET_FILENAME = "yamnet_looped_embeddings.csv"
 
-RANDOM_SEED = 42
+RANDOM_STATE = 42
 
 AGE_GROUP_CATEGORIES = ['Kitten', 'Adult', 'Senior']
 NUM_AGE_GROUPS = len(AGE_GROUP_CATEGORIES)
