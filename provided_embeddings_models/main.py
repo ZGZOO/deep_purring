@@ -1,8 +1,14 @@
 from typing import Tuple
 
+import torch
+
 from constants import *
 from provided_embeddings_models.preprocessing import split_embeddings, build_preprocessing_pipeline
+from provided_embeddings_models.train_model import get_loaders
 from util import *
+
+# random seed
+torch.manual_seed(RANDOM_STATE)
 
 # load dataset into pandas from csv
 data = load_embeddings_data(YAMNET_FILENAME)
@@ -54,3 +60,10 @@ print(f'Test features range: {test_features_processed.min():.3f} - {test_feature
 print(f'Train features pca: {train_features_processed.shape}')
 print(f'Val features pca: {val_features_processed.shape}')
 print(f'Test features pca: {test_features_processed.shape}')
+
+# get data loaders
+train_loader, val_loader, test_loader = get_loaders(train_features, val_features, test_features, train_labels,
+                                                    val_labels, test_labels, 32)
+print(f'Train loader: {len(train_loader)}x{train_loader.batch_size}')
+print(f'Val loader: {len(val_loader)}x{val_loader.batch_size}')
+print(f'Test loader: {len(test_loader)}x{test_loader.batch_size}')
