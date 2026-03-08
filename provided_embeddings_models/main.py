@@ -1,5 +1,5 @@
 from constants import *
-from provided_embeddings_models.preprocessing import split_embeddings, standardize_embeddings, pca_embeddings
+from provided_embeddings_models.preprocessing import split_embeddings, build_preprocessing_pipeline
 from util import *
 
 # load dataset into pandas from csv
@@ -28,16 +28,14 @@ print(f'Val labels: {val_labels.shape}')
 print(f'Test features: {test_features.shape}')
 print(f'Test labels: {test_labels.shape}')
 
-# standardized features
-(train_features_std, val_features_std,
- test_features_std) = standardize_embeddings(train_features, val_features, test_features)
-print(f'Train features range: {train_features_std.min()} - {train_features_std.max()}')
-print(f'Val features range: {val_features_std.min()} - {val_features_std.max()}')
-print(f'Test features range: {test_features_std.min()} - {test_features_std.max()}')
-
-# PCA features
-(train_features_pca, val_features_pca, test_features_pca) = pca_embeddings(train_features_std, val_features_std,
-                                                                           test_features_std, 32)
-print(f'Train features pca: {train_features_pca.shape}')
-print(f'Val features pca: {val_features_pca.shape}')
-print(f'Test features pca: {test_features_pca.shape}')
+# preprocess features
+pipeline = build_preprocessing_pipeline(n_components=32)
+train_features_processed = pipeline.fit_transform(train_features)
+val_features_processed = pipeline.transform(val_features)
+test_features_processed = pipeline.transform(test_features)
+print(f'Train features range: {train_features_processed.min():.3f} - {train_features_processed.max():.3f}')
+print(f'Val features range: {val_features_processed.min():.3f} - {val_features_processed.max():.3f}')
+print(f'Test features range: {test_features_processed.min():.3f} - {test_features_processed.max():.3f}')
+print(f'Train features pca: {train_features_processed.shape}')
+print(f'Val features pca: {val_features_processed.shape}')
+print(f'Test features pca: {test_features_processed.shape}')

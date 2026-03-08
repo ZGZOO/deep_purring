@@ -1,7 +1,8 @@
-from typing import Tuple
+from typing import Any, Tuple, List
 
 import pandas as pd
 from sklearn.decomposition import PCA
+from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
 
 from provided_embeddings_models.constants import RANDOM_STATE
@@ -58,30 +59,25 @@ def split_embeddings(all_embeddings: pd.DataFrame, label_col: str,
     return train_features, val_features, test_features, train_targets, val_targets, test_targets
 
 
-def standardize_embeddings(train_features: pd.DataFrame, val_features: pd.DataFrame,
-                           test_features: pd.DataFrame) -> Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
+def build_preprocessing_pipeline(
+        n_components: int | None = None,
+        steps_before: List[Tuple[str, Any]] | None = None,
+        steps_after: List[Tuple[str, Any]] | None = None,
+) -> Pipeline:
     """
-    Standardize embeddings using StandardScaler. The scaler is fit to the train_features only and then transforms all features.
-    :param train_features: pandas dataframe with train set embeddings
-    :param val_features: pandas dataframe with validation set embeddings
-    :param test_features: pandas dataframe with test set embeddings
-    :return: standardized train_features, val_features, test_features
-    """
-    scaler = StandardScaler()
-    scaler.fit(train_features)
-    return scaler.transform(train_features), scaler.transform(val_features), scaler.transform(test_features)
+    Build a scikit-learn Pipeline for preprocessing embeddings.
 
-
-def pca_embeddings(train_features: pd.DataFrame, val_features: pd.DataFrame, test_features: pd.DataFrame,
-                   n_components: int) -> Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
+    :param n_components: if provided, appends a PCA step with this many components; if None, PCA is omitted.
+    :param steps_before: optional list of (name, transformer) tuples prepended before StandardScaler.
+    :param steps_after: optional list of (name, transformer) tuples appended after PCA.
+    :return: unfitted sklearn Pipeline ready for fit_transform / transform calls.
     """
-    Reduce dimensionality of embeddings using PCA. PCA model is fit to the train_features only and then transforms all features.
-
-    :param train_features: pandas dataframe with train set embeddings
-    :param val_features: pandas dataframe with validation set embeddings
-    :param test_features: pandas dataframe with test set embeddings
-    :param n_components: number of PCA components
-    """
-    pca = PCA(n_components=n_components)
-    pca.fit(train_features)
-    return pca.transform(train_features), pca.transform(val_features), pca.transform(test_features)
+    steps: List[Tuple[str, Any]] = []
+    if steps_before:
+        steps.extend(steps_before)
+    steps.append(("scaler", StandardScaler()))
+    if n_components is not None:
+        steps.append(("pca", PCA(n_components=n_components)))
+    if steps_after:
+        steps.extend(steps_after)
+    return Pipeline(steps)
