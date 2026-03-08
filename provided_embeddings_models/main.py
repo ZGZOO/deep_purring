@@ -1,6 +1,6 @@
-# load dataset into pandas from csv
 from constants import *
-import pandas as pd
+from util import *
 
-data = pd.read_csv(EMBEDDINGS_DIR / "vggish_looped_embeddings.csv")
+# load dataset into pandas from csv
+data = load_embeddings_data(VGGISH_FILENAME)
 print(data.head())
