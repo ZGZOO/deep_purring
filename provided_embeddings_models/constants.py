@@ -9,3 +9,6 @@ VGGISH_FILENAME = "vggish_looped_embeddings.csv"
 YAMNET_FILENAME = "yamnet_looped_embeddings.csv"
 
 RANDOM_SEED = 42
+
+AGE_GROUP_CATEGORIES = ['Kitten', 'Adult', 'Senior']
+NUM_CLASSES = len(AGE_GROUP_CATEGORIES)
