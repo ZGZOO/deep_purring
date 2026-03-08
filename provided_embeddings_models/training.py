@@ -28,21 +28,18 @@ def split_embeddings(all_embeddings: pd.DataFrame, label_col: str,
     targets = all_embeddings[label_col]
 
     # First split: training set and a temp set (val + test)
-    _tmp: Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame] = train_test_split(
+    train_features, temp_features, train_targets, temp_targets = train_test_split(
         features, targets, test_size=(val_size + test_size), random_state=RANDOM_STATE, shuffle=True,
         stratify=targets
     )
-
-    train_features, temp_features, train_targets, temp_targets = _tmp
 
     # Adjust val and test sizes for second split
     new_test_size = test_size / (val_size + test_size)
 
     # Second split: val set and test set from temp set
-    _tmp2: Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame] = train_test_split(
+    val_features, test_features, val_targets, test_targets = train_test_split(
         temp_features, temp_targets, test_size=new_test_size, random_state=RANDOM_STATE, shuffle=True,
         stratify=temp_targets
     )
-    val_features, test_features, val_targets, test_targets = _tmp2
 
     return train_features, val_features, test_features, train_targets, val_targets, test_targets
