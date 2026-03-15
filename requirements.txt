@@ -3,6 +3,7 @@ pandas
 scikit-learn
 scipy
 torch
+librosa
 pytorch-lightning
 optuna
 torchmetrics
