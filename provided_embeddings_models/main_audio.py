@@ -123,11 +123,16 @@ def main():
     trainer.fit(model, train_loader, val_loader)
     trainer.test(model, test_loader)
 
-    # Save CNN so we can use it for load_audio_data() or inference later
+    # Save CNN (for load_audio_data / precompute embeddings)
     ckpt_path = MODEL_DIR / "cnn_embedding.pt"
     ckpt_path.parent.mkdir(parents=True, exist_ok=True)
     torch.save(model.cnn.state_dict(), ckpt_path)
     print(f"Saved CNN to {ckpt_path}")
+
+    # Save full model (CNN+MLP) for demo: one wav -> age group prediction
+    full_model_path = MODEL_DIR / "age_group_spectrogram_model.pt"
+    torch.save(model.state_dict(), full_model_path)
+    print(f"Saved full model for demo to {full_model_path}")
 
 
 if __name__ == "__main__":
