@@ -77,7 +77,7 @@ def fix_audio_length(
     target_samples: int = TARGET_SAMPLES,
 ) -> np.ndarray:
     """
-    Bring waveform to fixed length for the CNN window (Brian / paper).
+    Bring waveform to fixed length for the CNN window.
     - Longer: truncate to target_samples.
     - Shorter: loop (repeat) the audio to fill the window instead of padding with silence.
 

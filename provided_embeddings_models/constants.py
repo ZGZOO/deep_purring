@@ -12,7 +12,7 @@ N_FFT = 512
 HOP_LENGTH = 256
 N_MELS = 64
 
-# Fixed window length for CNN (Brian: longer -> truncate, shorter -> loop to fit)
+# Fixed window length for CNN (longer -> truncate, shorter -> loop to fit)
 TARGET_DURATION_SEC = 1.0
 TARGET_SAMPLES = int(SAMPLE_RATE * TARGET_DURATION_SEC)
 
