@@ -21,12 +21,8 @@ def load_embeddings_data(filename: str) -> pd.DataFrame:
     return df
 
 
-# TODO: Implement load_audio_data() in a new audio_loading.py module. It should:
-#  - load raw .wav files from AUDIO_DIR,
-#  - resample to 96kHz (max sample rate in the dataset),
-#  - generate spectrograms via spectrogram.py,
-#  - extract embeddings via cnn_embeddings.py,
-#  - return a DataFrame in the same format as load_embeddings_data().
+# Our-audio pipeline: use load_audio_data() from audio_loading.py to get embeddings
+# from raw wav (spectrogram -> CNN -> embedding). Requires a trained CNN; see main_audio.py.
 
 
 def _age_to_age_group(age: float) -> str:
