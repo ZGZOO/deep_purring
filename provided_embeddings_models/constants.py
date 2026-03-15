@@ -3,8 +3,25 @@ from pathlib import Path
 DATASET_DIR = Path(__file__).parent.parent / "feline-age-prediction" / "dataset"
 EMBEDDINGS_DIR = DATASET_DIR / "embeddings"
 AUDIO_DIR = DATASET_DIR / "raw_audio"
-# TODO: Add spectrogram generation constants (e.g. SAMPLE_RATE, HOP_LENGTH, N_MELS) for use in new spectrogram.py module
-# TODO: Add CNN model/checkpoint path constant(s) for use in a new cnn_embeddings.py module
+# Subfolder for YAMNet-style looped audio (used for our spectrogram+CNN pipeline)
+AUDIO_LOOPED_YAMNET_DIR = AUDIO_DIR / "AudioLoopedYAMNet"
+
+# Spectrogram generation (for spectrogram.py)
+SAMPLE_RATE = 16000
+N_FFT = 512
+HOP_LENGTH = 256
+N_MELS = 64
+
+# Fixed window length for CNN (Brian: longer -> truncate, shorter -> loop to fit)
+TARGET_DURATION_SEC = 1.0
+TARGET_SAMPLES = int(SAMPLE_RATE * TARGET_DURATION_SEC)
+
+# Our CNN embedding output dimension (feeds into CatMLP)
+EMBED_DIM = 128
+
+# CNN checkpoint for deployment / precomputed embeddings (optional)
+CNN_CHECKPOINT_DIR = Path(__file__).parent / "models"
+CNN_CHECKPOINT_FILENAME = "cnn_embedding.pt"
 
 # Precomputed datasets provided by paper
 PERCH_FILENAME = "perch_looped_embeddings.csv"
