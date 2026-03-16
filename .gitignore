@@ -1,0 +1,21 @@
+# Training logs (PyTorch Lightning)
+lightning_logs/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.Python
+*.so
+.venv/
+venv/
+env/
+
+# Optional: uncomment to ignore trained model weights (teammates run main_audio to get them)
+# provided_embeddings_models/models/*.pt
+
+# IDE / OS
+.DS_Store
+.idea/
+*.swp
+*.swo
