@@ -1,77 +1,82 @@
 ## Age Group Classification
 
-Best hyperparameters: {'n_components': 64, 'n_layers': 1, 'hidden_size': 64, 'lr': 0.0002156579828606166}
+### Best hyperparameters:
 
-Best val metric: 0.7463 (macro F1-score)
+'n_components': 44
 
-| Name    | Type              | Params | Mode  | FLOPs |
-|---------|-------------------|--------|-------|-------|
-| net     | Sequential        | 4.4 K  | train | 0     |
-| loss_fn | CrossEntropyLoss  | 0      | train | 0     |
-| metric  | MulticlassF1Score | 0      | train | 0     |
+'n_layers': 1
 
-* 4.4 K Trainable params
-* 0 Non-trainable params
-* 4.4 K Total params
-* 0.017 Total estimated model params size (MB)
-* 6 Modules in train mode
-* 0 Modules in eval mode
-* 0 Total Flops
+'hidden_size': 256
 
-test metric: 0.6917523145675659 (macro F1-score)
+'lr': 0.0005315193667214779
 
-Saved preprocessing pipeline to models/age_group_pipeline.joblib
+### Val set performance:
 
-Saved model checkpoint to models/age_group_model.ckpt
+Best macro F1: 0.4841
+
+### Test set performance:
+
+| Class        | precision | recall | f1-score | support |
+|--------------|-----------|--------|----------|---------|
+| Kitten       | 0.76      | 0.55   | 0.64     | 76      |
+| Adult        | 0.63      | 0.79   | 0.70     | 105     |
+| Senior       | 0.52      | 0.41   | 0.46     | 27      |
+| macro avg    | 0.64      | 0.58   | 0.60     | 208     |
+| weighted avg | 0.66      | 0.65   | 0.65     | 208     |
+
+accuracy: 0.65
+
+![age group confusion matrix](age_group_confusion_matrix.png)
 
 ## Age Regression
 
-Best hyperparameters: {'n_components': 30, 'n_layers': 4, 'hidden_size': 64, 'lr': 0.0001555810423537441}
+### Best hyperparameters:
 
-Best val metric: 2.9848 (MAE)
+'n_components': 41
 
-| Name    | Type              | Params | Mode  | FLOPs |
-|---------|-------------------|--------|-------|-------|
-| net     | Sequential        | 14.5 K | train | 0     |
-| loss_fn | MSELoss           | 0      | train | 0     |
-| metric  | MeanAbsoluteError | 0      | train | 0     |
+'n_layers': 4
 
-* 14.5 K Trainable params
-* 0 Non-trainable params
-* 14.5 K Total params
-* 0.058 Total estimated model params size (MB)
-* 12 Modules in train mode
-* 0 Modules in eval mode
-* 0 Total Flops
+'hidden_size': 64
 
-test_metric: 4.101724147796631 (MAE)
+'lr': 0.00015852368378296605
 
-Saved preprocessing pipeline to models/age_pipeline.joblib
+### Val set performance:
 
-Saved model checkpoint to models/age_model.ckpt
+Best MAE: 5.3630
+
+### Test set performance:
+
+MAE: 3.0430
+
+RMSE: 3.9395
+
+QWK: 0.5901
 
 ## Gender Classification
 
-Best hyperparameters: {'n_components': 56, 'n_layers': 2, 'hidden_size': 128, 'lr': 0.00420169371894944}
+### Best hyperparameters:
 
-Best val metric: 0.6897 (macro F1-score)
+'n_components': 50
 
-| Name    | Type             | Params | Mode  | FLOPs |
-|---------|------------------|--------|-------|-------|
-| net     | Sequential       | 24.1 K | train | 0     |
-| loss_fn | CrossEntropyLoss | 0      | train | 0     |   
-| metric  | BinaryF1Score    | 0      | train | 0     |
+'n_layers': 2
 
-* 24.1 K Trainable params
-* 0 Non-trainable params
-* 24.1 K Total params
-* 0.096 Total estimated model params size (MB)
-* 8 Modules in train mode
-* 0 Modules in eval mode
-* 0 Total Flops
+'hidden_size': 128
 
-test_metric: 0.6666666865348816 (macro F1-score)
+'lr': 0.0004530479974868457
 
-Saved preprocessing pipeline to models/gender_pipeline.joblib
+### Val set performance:
 
-Saved model checkpoint to models/gender_model.ckpt
+Best 'Female' f1: 0.4912
+
+### Test set performance:
+
+| class        | precision | recall | f1-score | support |
+|--------------|-----------|--------|----------|---------|
+| M            | 0.66      | 0.74   | 0.70     | 78      |
+| F            | 0.33      | 0.25   | 0.29     | 40      |
+| macro avg    | 0.50      | 0.50   | 0.49     | 118     |
+| weighted avg | 0.55      | 0.58   | 0.56     | 118     |
+
+accuracy: 0.58
+
+![gender confusion matrix](gender_confusion_matrix.png)

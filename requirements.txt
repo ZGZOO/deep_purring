@@ -7,3 +7,5 @@ pytorch-lightning
 optuna
 torchmetrics
 joblib
+matplotlib
+seaborn

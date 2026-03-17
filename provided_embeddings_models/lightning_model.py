@@ -36,6 +36,8 @@ class CatMLP(pl.LightningModule):
             in_size = h
         layers.append(nn.Linear(in_size, output_size))
         self.net = nn.Sequential(*layers)
+        self.test_preds: list = []
+        self.test_targets: list = []
 
         if task == "age":
             self.loss_fn = nn.MSELoss()
@@ -80,17 +82,34 @@ class CatMLP(pl.LightningModule):
         logits = self(x)
         if self.task == "age":
             self.metric.update(logits.squeeze(-1), y)
+            self.test_preds.append(logits.squeeze(-1).detach().cpu())
         else:
             preds = logits.argmax(dim=1)
             self.metric.update(preds, y)
+            self.test_preds.append(preds.detach().cpu())
+        self.test_targets.append(y.detach().cpu())
         self.log("test_metric", self.metric, on_epoch=True, on_step=False)
-        # TODO: Accumulate preds and targets across batches (e.g., self.test_preds/self.test_targets lists) to enable
-        #  epoch-level metric computation in on_test_epoch_end().
 
-    # TODO: Implement on_test_epoch_end() to compute and log extended metrics from accumulated preds/targets:
-    #   - age_group / gender: sklearn.metrics.classification_report (full per-class precision, recall, F1)
-    #   - age: RMSE (sqrt of MSE) and QWK (sklearn.metrics.cohen_kappa_score with weights='quadratic', applied to
-    #          rounded integer predictions)
+    def on_test_epoch_end(self):
+        from sklearn.metrics import classification_report, cohen_kappa_score, root_mean_squared_error
+
+        all_preds = torch.cat(self.test_preds).numpy()
+        all_targets = torch.cat(self.test_targets).numpy()
+
+        if self.task == "age_group":
+            from provided_embeddings_models.constants import AGE_GROUP_CATEGORIES
+            print(classification_report(all_targets, all_preds, target_names=AGE_GROUP_CATEGORIES))
+        elif self.task == "gender":
+            from provided_embeddings_models.constants import GENDER_CATEGORIES
+            print(classification_report(all_targets, all_preds, target_names=GENDER_CATEGORIES[:-1]))
+        elif self.task == "age":
+            rmse = root_mean_squared_error(all_targets, all_preds)
+            qwk = cohen_kappa_score(
+                all_targets.round().astype(int),
+                all_preds.round().astype(int),
+                weights="quadratic",
+            )
+            print(f"RMSE: {rmse:.4f}  QWK: {qwk:.4f}")
 
     def configure_optimizers(self):
         return torch.optim.Adam(self.parameters(), lr=self.lr)

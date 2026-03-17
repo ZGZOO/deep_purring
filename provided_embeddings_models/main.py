@@ -166,9 +166,29 @@ def train_model_main(task: TaskType, cfg: TaskConfig, data: pd.DataFrame) -> Non
     final_trainer.fit(final_model, train_loader, val_loader)
     final_trainer.test(final_model, test_loader)
 
-    # TODO: After test, retrieve accumulated predictions from final_model and print/log extended metrics
-    #  (age_group/gender -> classification report; age -> MAE, RMSE, QWK) as computed in on_test_epoch_end().
-    #  (See lightning_model.py)
+    if task in ("age_group", "gender"):
+        import seaborn as sns
+        import matplotlib.pyplot as plt
+        from sklearn.metrics import confusion_matrix
+        import torch
+
+        all_preds = torch.cat(final_model.test_preds).numpy()
+        all_targets = torch.cat(final_model.test_targets).numpy()
+        labels = AGE_GROUP_CATEGORIES if task == "age_group" else ["M", "F"]
+
+        cm = confusion_matrix(all_targets, all_preds)
+        fig, ax = plt.subplots(figsize=(len(labels) + 2, len(labels) + 2))
+        sns.heatmap(cm, annot=True, fmt="d", cmap="Blues",
+                    xticklabels=labels, yticklabels=labels, ax=ax)
+        ax.set_xlabel("Predicted")
+        ax.set_ylabel("Actual")
+        ax.set_title(f"{task} — Confusion Matrix")
+        fig.tight_layout()
+
+        cm_path = Path(__file__).parent / f"{task}_confusion_matrix.png"
+        fig.savefig(cm_path, dpi=150)
+        plt.close(fig)
+        print(f"Saved confusion matrix to {cm_path}")
 
     # Save for deployment
     ckpt_path = MODEL_DIR / f"{task}_model.ckpt"
