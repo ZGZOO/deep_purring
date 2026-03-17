@@ -30,21 +30,22 @@ from provided_embeddings_models.tasks import TaskType
 
 def parse_wav_metadata(filename: str) -> Optional[dict]:
     """
-    Parse age and gender from a wav filename.
-    Example: 0.5Y-022A-F1-01.wav -> age=0.5, gender='F'
+    Parse age, gender, and cat_id from a wav filename.
+    Example: 0.5Y-022A-F1-01.wav -> age=0.5, gender='F', cat_id='022A'
 
     :param filename: e.g. 0.5Y-022A-F1-01.wav
-    :return: dict with keys age (float), gender (str), age_group (str), or None if parse fails
+    :return: dict with keys age, gender, age_group, cat_id, or None if parse fails
     """
-    # Match: digits.digitsY or digitsY at start, then later M, F, or X before .wav
     age_match = re.match(r"^([\d.]+)Y", filename)
     gender_match = re.search(r"([MFX])(?=[-\d.]*\.wav)", filename)
-    if not age_match or not gender_match:
+    cat_match = re.search(r"Y-([0-9A-Za-z]+)-[MFX]", filename)
+    if not age_match or not gender_match or not cat_match:
         return None
     age = float(age_match.group(1))
     gender = gender_match.group(1)
+    cat_id = cat_match.group(1)
     age_group = _age_to_age_group_str(age)
-    return {"age": age, "gender": gender, "age_group": age_group}
+    return {"age": age, "gender": gender, "age_group": age_group, "cat_id": cat_id}
 
 
 def _age_to_age_group_str(age: float) -> str:
@@ -185,6 +186,7 @@ def load_audio_data(
         row["age"] = meta["age"]
         row["age_group"] = meta["age_group"]
         row["gender"] = meta["gender"]
+        row["cat_id"] = meta["cat_id"]
         rows.append(row)
 
     df = pd.DataFrame(rows)

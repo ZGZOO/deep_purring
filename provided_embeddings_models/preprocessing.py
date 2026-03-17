@@ -4,7 +4,7 @@ import numpy as np
 import pandas as pd
 import torch
 from sklearn.decomposition import PCA
-from sklearn.model_selection import train_test_split
+from sklearn.model_selection import train_test_split, GroupShuffleSplit
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
 from torch.utils.data import DataLoader, TensorDataset
@@ -59,6 +59,52 @@ def split_embeddings(all_embeddings: pd.DataFrame, label_col: TaskType,
             temp_features, temp_targets, test_size=new_test_size, random_state=RANDOM_STATE, shuffle=True,
             stratify=temp_targets
         )
+
+    return train_features, val_features, test_features, train_targets, val_targets, test_targets
+
+
+def split_embeddings_grouped(
+    all_embeddings: pd.DataFrame,
+    label_col: str,
+    group_col: str = "cat_id",
+    val_size: float = 0.1,
+    test_size: float = 0.1,
+    regression: bool = False,
+) -> Tuple[
+    pd.DataFrame, pd.DataFrame, pd.DataFrame,
+    pd.Series, pd.Series, pd.Series,
+]:
+    """
+    Split by group (e.g. cat_id) so the same cat never appears in two splits.
+    Same interface as split_embeddings; group_col is dropped from features.
+    """
+    assert label_col in all_embeddings.columns
+    assert group_col in all_embeddings.columns
+    assert 0 < val_size < 1
+    assert 0 < test_size < 1
+    assert 0 < val_size + test_size < 1
+
+    features = all_embeddings.drop(columns=[label_col, group_col])
+    targets = all_embeddings[label_col]
+    groups = all_embeddings[group_col]
+
+    gss = GroupShuffleSplit(test_size=(val_size + test_size), n_splits=1, random_state=RANDOM_STATE)
+    train_idx, temp_idx = next(gss.split(features, targets, groups=groups))
+
+    train_features = features.iloc[train_idx]
+    train_targets = targets.iloc[train_idx]
+    temp_features = features.iloc[temp_idx]
+    temp_targets = targets.iloc[temp_idx]
+    temp_groups = groups.iloc[temp_idx]
+
+    new_test_size = test_size / (val_size + test_size)
+    gss2 = GroupShuffleSplit(test_size=new_test_size, n_splits=1, random_state=RANDOM_STATE + 1)
+    val_idx_rel, test_idx_rel = next(gss2.split(temp_features, temp_targets, groups=temp_groups))
+
+    val_features = temp_features.iloc[val_idx_rel]
+    val_targets = temp_targets.iloc[val_idx_rel]
+    test_features = temp_features.iloc[test_idx_rel]
+    test_targets = temp_targets.iloc[test_idx_rel]
 
     return train_features, val_features, test_features, train_targets, val_targets, test_targets
 

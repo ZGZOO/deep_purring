@@ -10,7 +10,12 @@ from sklearn.preprocessing import StandardScaler
 
 from provided_embeddings_models.constants import *
 from provided_embeddings_models.lightning_model import CatMLP
-from provided_embeddings_models.preprocessing import split_embeddings, build_preprocessing_pipeline, get_loaders
+from provided_embeddings_models.preprocessing import (
+    split_embeddings,
+    split_embeddings_grouped,
+    build_preprocessing_pipeline,
+    get_loaders,
+)
 from provided_embeddings_models.tasks import TaskType, TASK_CONFIGS, TaskConfig
 from provided_embeddings_models.util import *
 
@@ -25,7 +30,9 @@ def get_age_group_split(data: pd.DataFrame) -> Tuple[
     :return: train_features, val_features, test_features, train_targets, val_targets, test_targets
     """
     age_group_cleaned = clean_embeddings_for_age_group(data)
-    return split_embeddings(age_group_cleaned, "age_group", val_size=0.12, regression=False)
+    return split_embeddings_grouped(
+        age_group_cleaned, "age_group", group_col="cat_id", val_size=0.12, regression=False
+    )
 
 
 def get_age_split(data: pd.DataFrame) -> Tuple[
@@ -36,7 +43,9 @@ def get_age_split(data: pd.DataFrame) -> Tuple[
     :return: train_features, val_features, test_features, train_targets, val_targets, test_targets
     """
     age_cleaned = clean_embeddings_for_age(data)
-    return split_embeddings(age_cleaned, "age", val_size=0.12, regression=True)
+    return split_embeddings_grouped(
+        age_cleaned, "age", group_col="cat_id", val_size=0.12, regression=True
+    )
 
 
 def get_gender_split(data: pd.DataFrame) -> Tuple[
@@ -48,7 +57,9 @@ def get_gender_split(data: pd.DataFrame) -> Tuple[
     :return: train_features, val_features, test_features, train_targets, val_targets, test_targets
     """
     gender_cleaned = clean_embeddings_for_gender(data)
-    return split_embeddings(gender_cleaned, "gender", val_size=0.12, regression=False)
+    return split_embeddings_grouped(
+        gender_cleaned, "gender", group_col="cat_id", val_size=0.12, regression=False
+    )
 
 
 def standardize_features(raw_train: pd.DataFrame, raw_val: pd.DataFrame, raw_test: pd.DataFrame) -> Tuple[
@@ -178,7 +189,7 @@ def train_model_main(task: TaskType, cfg: TaskConfig, data: pd.DataFrame) -> Non
 
 if __name__ == "__main__":
     # Task selection ##############################################################
-    TASK: TaskType = "gender"  # MUST BE "age_group" | "gender" | "age"
+    TASK: TaskType = "age_group"  # MUST BE "age_group" | "gender" | "age"
     task_config = TASK_CONFIGS[TASK]
 
     # Data loading ################################################################
