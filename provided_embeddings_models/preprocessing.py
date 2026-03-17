@@ -4,7 +4,7 @@ import numpy as np
 import pandas as pd
 import torch
 from sklearn.decomposition import PCA
-from sklearn.model_selection import train_test_split
+from sklearn.model_selection import GroupShuffleSplit
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
 from torch.utils.data import DataLoader, TensorDataset
@@ -14,17 +14,17 @@ from provided_embeddings_models.tasks import TaskType
 
 
 def split_embeddings(all_embeddings: pd.DataFrame, label_col: TaskType,
-                     val_size: float = 0.1, test_size: float = 0.1, regression: bool = False) -> Tuple[
+                     val_size: float = 0.1, test_size: float = 0.1) -> Tuple[
     pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame]:
     """
-    Split embeddings into train, validation, and test sets.
+    Split embeddings into train, validation, and test sets, grouped by cat_id so that all
+    recordings from a given cat land in exactly one split (no data leakage across cats).
     Combined size of the validation and test sets must be less than the entire dataset.
 
-    :param all_embeddings: pandas dataframe with all embeddings
+    :param all_embeddings: pandas dataframe with all embeddings; must contain a 'cat_id' column
     :param label_col: name of target column
     :param val_size: size of validation set. Must be float in (0, 1). Defaults to 0.1.
     :param test_size: size of test set. Must be float in (0, 1). Defaults to 0.1.
-    :param regression: if False, use stratified sampling instead of random sampling. Defaults to False.
     :return: train_features, val_features, test_features, train_targets, val_targets, test_targets
     """
     assert label_col in all_embeddings.columns
@@ -34,31 +34,26 @@ def split_embeddings(all_embeddings: pd.DataFrame, label_col: TaskType,
 
     features = all_embeddings.drop(columns=label_col)
     targets = all_embeddings[label_col]
+    groups = features["cat_id"]
 
-    # First split: training set and a temp set (val + test)
-    if regression:
-        train_features, temp_features, train_targets, temp_targets = train_test_split(
-            features, targets, test_size=(val_size + test_size), random_state=RANDOM_STATE, shuffle=True
-        )
-    else:
-        train_features, temp_features, train_targets, temp_targets = train_test_split(
-            features, targets, test_size=(val_size + test_size), random_state=RANDOM_STATE, shuffle=True,
-            stratify=targets
-        )
+    # Stage 1: train vs temp (val + test)
+    gss1 = GroupShuffleSplit(n_splits=1, test_size=val_size + test_size, random_state=RANDOM_STATE)
+    train_idx, temp_idx = next(gss1.split(features, targets, groups=groups))
 
-    # Adjust val and test sizes for second split
+    train_features, train_targets = features.iloc[train_idx], targets.iloc[train_idx]
+    temp_features, temp_targets = features.iloc[temp_idx], targets.iloc[temp_idx]
+    temp_groups = groups.iloc[temp_idx]
+
+    # Stage 2: val vs test from temp
     new_test_size = test_size / (val_size + test_size)
+    gss2 = GroupShuffleSplit(n_splits=1, test_size=new_test_size, random_state=RANDOM_STATE)
+    val_idx, test_idx = next(gss2.split(temp_features, temp_targets, groups=temp_groups))
 
-    # Second split: val set and test set from temp set
-    if regression:
-        val_features, test_features, val_targets, test_targets = train_test_split(
-            temp_features, temp_targets, test_size=new_test_size, random_state=RANDOM_STATE, shuffle=True
-        )
-    else:
-        val_features, test_features, val_targets, test_targets = train_test_split(
-            temp_features, temp_targets, test_size=new_test_size, random_state=RANDOM_STATE, shuffle=True,
-            stratify=temp_targets
-        )
+    val_features, val_targets = temp_features.iloc[val_idx], temp_targets.iloc[val_idx]
+    test_features, test_targets = temp_features.iloc[test_idx], temp_targets.iloc[test_idx]
+
+    for df in (train_features, val_features, test_features):
+        df.drop(columns=["cat_id"], inplace=True)
 
     return train_features, val_features, test_features, train_targets, val_targets, test_targets
 

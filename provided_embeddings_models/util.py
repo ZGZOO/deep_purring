@@ -93,7 +93,7 @@ def _gender_str_to_index(gender: str) -> int:
 
 def _clean_embeddings(df: DataFrame, label_col: str) -> Series | DataFrame | Any:
     # original features are numbered 0-N
-    new_df = df.drop(columns=[col for col in df.columns if col != label_col and not col.isnumeric()])
+    new_df = df.drop(columns=[col for col in df.columns if col not in [label_col, "cat_id"] and not col.isnumeric()])
 
     # remove any rows with missing values
     bad = new_df.isna().any(axis=1)
