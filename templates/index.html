@@ -30,6 +30,7 @@
             <div class="record-controls">
               <button type="button" id="start-recording">Start recording</button>
               <button type="button" id="stop-recording" disabled>Stop</button>
+              <a href="{{ url_for('index') }}" id="clear-recording" class="clear-link">Clear</a>
               <span id="recording-status">Ready to record</span>
             </div>
             <audio id="recording-preview" controls hidden></audio>
@@ -43,7 +44,7 @@
         {% endif %}
 
         {% if result %}
-          <section class="result">
+          <section id="prediction-result" class="result">
             <div class="result-header">
               <p class="result-label">Prediction</p>
               <h2>{{ result.label }}</h2>
@@ -72,6 +73,7 @@
     </main>
 
     <script>
+      const form = document.getElementById("predict-form");
       const fileInput = document.getElementById("audio-file");
       const startButton = document.getElementById("start-recording");
       const stopButton = document.getElementById("stop-recording");
@@ -85,6 +87,17 @@
       let recordedChunks = [];
       let currentFile = null;
 
+      function clearRecording() {
+        currentFile = null;
+        fileInput.value = "";
+        if (preview.src) {
+          URL.revokeObjectURL(preview.src);
+        }
+        preview.removeAttribute("src");
+        preview.hidden = true;
+        statusText.textContent = "Ready to record";
+      }
+
       fileInput.addEventListener("change", () => {
         if (fileInput.files.length > 0) {
           currentFile = fileInput.files[0];
@@ -94,7 +107,25 @@
         }
       });
 
+      form.addEventListener("submit", async (e) => {
+        if (currentFile && currentFile.name === "recorded-cat-audio.wav") {
+          e.preventDefault();
+          const fd = new FormData();
+          fd.append("audio", currentFile, "recorded-cat-audio.wav");
+          try {
+            const resp = await fetch("", { method: "POST", body: fd });
+            const html = await resp.text();
+            document.open();
+            document.write(html);
+            document.close();
+          } catch (err) {
+            statusText.textContent = "Upload failed: " + err.message;
+          }
+        }
+      });
+
       startButton.addEventListener("click", async () => {
+        clearRecording();
         try {
           mediaStream = await navigator.mediaDevices.getUserMedia({ audio: true });
           audioContext = new (window.AudioContext || window.webkitAudioContext)({ sampleRate: 16000 });
@@ -133,7 +164,8 @@
           mediaStream.getTracks().forEach((track) => track.stop());
         }
 
-        const wavBlob = encodeWav(recordedChunks, 16000);
+        const actualSampleRate = audioContext ? audioContext.sampleRate : 16000;
+        const wavBlob = encodeWav(recordedChunks, actualSampleRate);
         currentFile = new File([wavBlob], "recorded-cat-audio.wav", { type: "audio/wav" });
         const dataTransfer = new DataTransfer();
         dataTransfer.items.add(currentFile);

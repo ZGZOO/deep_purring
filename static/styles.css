@@ -106,6 +106,25 @@ input[type="file"] {
   align-items: center;
 }
 
+.clear-link {
+  appearance: none;
+  border: 0;
+  border-radius: 999px;
+  padding: 13px 20px;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+  background: #efe4d2;
+  color: var(--ink);
+  text-decoration: none;
+  display: inline-block;
+  transition: transform 180ms ease, opacity 180ms ease, background 180ms ease;
+}
+
+.clear-link:hover {
+  transform: translateY(-1px);
+}
+
 button,
 .submit {
   appearance: none;
